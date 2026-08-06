@@ -32,7 +32,7 @@ Review plugins before loading them: Prime Agent extensions run with your user pe
 
 ### ask_user
 
-The first Prime Plugins entry is `ask_user`, a focused multiple-choice question tool that always adds an `Other (type your own answer)` choice. Selecting it opens a freeform input. Results identify whether the answer came from a listed option or freeform input.
+The first Prime Plugins entry is `ask_user`, a focused multiple-choice question tool that always adds an `Other (type your own answer)` choice. Selecting it opens a freeform input. An optional `context` string travels with the answer metadata without being shown in the question UI. Results identify whether the answer came from a listed option or freeform input.
 
 Source: [plugins/ask-user](plugins/ask-user)
 
@@ -41,11 +41,12 @@ Tool input:
 ```json
 {
   "question": "Which release channel should I use?",
+  "context": "The release will start with a small pilot.",
   "options": ["Stable", "Beta"]
 }
 ```
 
-The `question` is required and may be up to 4,000 characters. `options` must contain 2–12 non-empty choices, each up to 500 characters. Results include `answerSource: "option"` or `answerSource: "freeform"`.
+The `question` is required and may be up to 4,000 characters. `context` is optional and may be up to 8,000 characters; it is returned with the answer metadata but is not shown in the question UI. `options` must contain 2–12 non-empty choices, each up to 500 characters. Results include `answerSource: "option"` or `answerSource: "freeform"`.
 
 ## Requirements
 
