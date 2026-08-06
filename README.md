@@ -1,19 +1,19 @@
-# Prime Plugins
+# Prime Agent Plugins
 
-Prime Plugins is a collection of installable [Prime Agent](https://github.com/PrimeIntellect-ai/prime-agent) plugins. Each plugin lives under `plugins/`; the root package manifest loads the collection as one capability package.
+Prime Agent Plugins is a collection of installable [Prime Agent](https://github.com/PrimeIntellect-ai/prime-agent) plugins. Each plugin lives under `plugins/`; the root package manifest loads the collection as one capability package.
 
 ## Install from GitHub
 
 Install the collection for every project:
 
 ```bash
-prime-agent package install https://github.com/am-will/prime-plugins
+prime-agent package install https://github.com/am-will/prime-agent-plugins
 ```
 
 Install it only for the current project:
 
 ```bash
-prime-agent package install https://github.com/am-will/prime-plugins --local
+prime-agent package install https://github.com/am-will/prime-agent-plugins --local
 ```
 
 Prime Agent discovers the plugin directories from the root `pi` manifest. Restart Prime Agent, or run `/reload`, after installing.
@@ -22,7 +22,7 @@ For a manual copy of only the ask-user extension:
 
 ```bash
 mkdir -p ~/.prime/agent/extensions
-curl -fsSL https://raw.githubusercontent.com/am-will/prime-plugins/main/plugins/ask-user/extensions/ask-user.ts \
+curl -fsSL https://raw.githubusercontent.com/am-will/prime-agent-plugins/main/plugins/ask-user/extensions/ask-user.ts \
   -o ~/.prime/agent/extensions/ask-user.ts
 ```
 
@@ -32,7 +32,7 @@ Review plugins before loading them: Prime Agent extensions run with your user pe
 
 ### ask_user
 
-The first Prime Plugins entry is `ask_user`, a focused multiple-choice question tool that always adds an `Other (type your own answer)` choice. Selecting it opens a freeform input. An optional `context` string travels with the answer metadata without being shown in the question UI. Results identify whether the answer came from a listed option or freeform input.
+The first Prime Agent Plugins entry is `ask_user`, a focused multiple-choice question tool that always adds an `Other (type your own answer)` choice. Selecting it opens a freeform input. An optional `context` string travels with the answer metadata without being shown in the question UI. Results identify whether the answer came from a listed option or freeform input.
 
 Source: [plugins/ask-user](plugins/ask-user)
 
