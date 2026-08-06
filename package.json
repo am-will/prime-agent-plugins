@@ -1,6 +1,6 @@
 {
   "name": "prime-plugins",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A collection of installable Prime Agent plugins, starting with ask_user",
   "type": "module",
   "license": "MIT",
