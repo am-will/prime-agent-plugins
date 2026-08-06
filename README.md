@@ -1,36 +1,42 @@
-# Prime Agent Ask User
+# Prime Plugins
 
-`ask_user` is a small Prime Agent extension that lets an agent pause for a focused multiple-choice answer. It works in Prime Agent's native interactive CLI and in clients that bridge Prime Agent's extension UI, including Prime Work.
+Prime Plugins is a collection of installable [Prime Agent](https://github.com/PrimeIntellect-ai/prime-agent) plugins. Each plugin lives under `plugins/`; the root package manifest loads the collection as one capability package.
 
 ## Install from GitHub
 
-Install it for every project:
+Install the collection for every project:
 
 ```bash
-prime-agent package install https://github.com/am-will/prime-agent-ask-user
+prime-agent package install https://github.com/am-will/prime-plugins
 ```
 
 Install it only for the current project:
 
 ```bash
-prime-agent package install https://github.com/am-will/prime-agent-ask-user --local
+prime-agent package install https://github.com/am-will/prime-plugins --local
 ```
 
-Prime Agent installs the package under its capability-package directory and discovers the extension from the `pi` manifest. Restart Prime Agent, or run `/reload`, after installing.
+Prime Agent discovers the plugin directories from the root `pi` manifest. Restart Prime Agent, or run `/reload`, after installing.
 
-For a manual copy into the global extension directory:
+For a manual copy of only the ask-user extension:
 
 ```bash
 mkdir -p ~/.prime/agent/extensions
-curl -fsSL https://raw.githubusercontent.com/am-will/prime-agent-ask-user/main/extensions/ask-user.ts \
+curl -fsSL https://raw.githubusercontent.com/am-will/prime-plugins/main/plugins/ask-user/extensions/ask-user.ts \
   -o ~/.prime/agent/extensions/ask-user.ts
 ```
 
-The manual copy is useful when you want the source file directly. Review the file before loading any third-party extension: Prime Agent extensions run with your user permissions.
+Review plugins before loading them: Prime Agent extensions run with your user permissions.
 
-## Tool contract
+## Included plugins
 
-The extension registers a sequential tool named `ask_user`:
+### ask_user
+
+The first Prime Plugins entry is `ask_user`, a focused multiple-choice question tool that always adds an `Other (type your own answer)` choice. Selecting it opens a freeform input. Results identify whether the answer came from a listed option or freeform input.
+
+Source: [plugins/ask-user](plugins/ask-user)
+
+Tool input:
 
 ```json
 {
@@ -39,16 +45,18 @@ The extension registers a sequential tool named `ask_user`:
 }
 ```
 
-The tool always adds an `Other (type your own answer)` choice. If the user chooses it, the extension opens a freeform input and returns the typed answer. Results include `answerSource: "option"` for a listed choice or `answerSource: "freeform"` for the custom response. `question` is required and may be up to 4,000 characters. `options` must contain 2–12 non-empty choices, each up to 500 characters.
-
-Non-interactive modes such as `--print` and JSON mode do not have a question UI, so the tool reports that it is unavailable instead of blocking.
+The `question` is required and may be up to 4,000 characters. `options` must contain 2–12 non-empty choices, each up to 500 characters. Results include `answerSource: "option"` or `answerSource: "freeform"`.
 
 ## Requirements
 
 - Prime Agent 0.7 or newer
 - An interactive Prime Agent client for answering questions
 
-Prime Agent provides the inherited `@earendil-works/pi-coding-agent` and `typebox` modules at runtime; this package does not bundle them.
+Prime Agent provides inherited `@earendil-works/pi-coding-agent` and `typebox` modules at runtime; this collection does not bundle them.
+
+## Adding a plugin
+
+Add the plugin source under `plugins/<name>/`, then add its extension directory to the root `pi.extensions` list in `package.json`. Keeping each plugin in its own directory makes the collection easy to inspect and extend.
 
 ## License
 
