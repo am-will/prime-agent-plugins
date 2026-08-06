@@ -1,5 +1,5 @@
 {
-  "name": "prime-plugins",
+  "name": "prime-agent-plugins",
   "version": "0.4.0",
   "description": "A collection of installable Prime Agent plugins, starting with ask_user",
   "type": "module",
@@ -13,12 +13,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/am-will/prime-plugins.git"
+    "url": "git+https://github.com/am-will/prime-agent-plugins.git"
   },
   "bugs": {
-    "url": "https://github.com/am-will/prime-plugins/issues"
+    "url": "https://github.com/am-will/prime-agent-plugins/issues"
   },
-  "homepage": "https://github.com/am-will/prime-plugins#readme",
+  "homepage": "https://github.com/am-will/prime-agent-plugins#readme",
   "files": [
     "plugins",
     "README.md",
