@@ -28,7 +28,7 @@ export default function askUser(pi: ExtensionAPI): void {
     executionMode: "sequential",
 
     async execute(_toolCallId, params, signal, _onUpdate, ctx) {
-      const options = [...params.options, OTHER_OPTION];
+      const options = params.options.includes(OTHER_OPTION) ? params.options : [...params.options, OTHER_OPTION];
       if (!ctx.hasUI) {
         return {
           content: [{ type: "text", text: "The user-question UI is not available in this mode." }],
@@ -56,7 +56,7 @@ export default function askUser(pi: ExtensionAPI): void {
       }
 
       return {
-        content: [{ type: "text", text: `The user selected: ${answer}` }],
+        content: [{ type: "text", text: `${answerSource === "freeform" ? "The user answered" : "The user selected"}: ${answer}` }],
         details: { question: params.question, options: params.options, answer, answerSource },
       };
     },
