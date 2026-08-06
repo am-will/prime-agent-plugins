@@ -1,7 +1,7 @@
 {
   "name": "prime-agent-ask-user",
-  "version": "0.1.0",
-  "description": "A focused multiple-choice ask_user tool for Prime Agent",
+  "version": "0.1.1",
+  "description": "A focused multiple-choice ask_user tool with optional context for Prime Agent",
   "type": "module",
   "license": "MIT",
   "keywords": [
