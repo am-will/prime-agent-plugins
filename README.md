@@ -22,7 +22,7 @@ For a manual copy into the global extension directory:
 
 ```bash
 mkdir -p ~/.prime/agent/extensions
-curl -fsSL https://raw.githubusercontent.com/am-will/prime-agent-ask-user/main/extensions/ask-user.ts \\
+curl -fsSL https://raw.githubusercontent.com/am-will/prime-agent-ask-user/main/extensions/ask-user.ts \
   -o ~/.prime/agent/extensions/ask-user.ts
 ```
 
@@ -35,11 +35,12 @@ The extension registers a sequential tool named `ask_user`:
 ```json
 {
   "question": "Which release channel should I use?",
+  "context": "This changes the default audience for the next deployment.",
   "options": ["Stable", "Beta"]
 }
 ```
 
-`question` is required and may be up to 4,000 characters. `options` must contain 2–12 non-empty choices, each up to 500 characters. The tool returns the selected string, or a cancellation/no-UI result when the user dismisses the prompt or the runtime has no interactive UI.
+`question` is required and may be up to 4,000 characters. `context` is optional and may be up to 4,000 characters; interactive clients show it above the question to help the user decide. `options` must contain 2–12 non-empty choices, each up to 500 characters. The tool returns the selected string, or a cancellation/no-UI result when the user dismisses the prompt or the runtime has no interactive UI.
 
 Non-interactive modes such as `--print` and JSON mode do not have a question UI, so the tool reports that it is unavailable instead of blocking.
 
