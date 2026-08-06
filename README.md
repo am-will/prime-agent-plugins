@@ -1,6 +1,6 @@
 # Prime Agent Plugins
 
-Prime Agent Plugins is a collection of installable [Prime Agent](https://github.com/PrimeIntellect-ai/prime-agent) plugins. Each plugin lives under `plugins/`; the root package manifest loads the collection as one capability package.
+Prime Agent Plugins is a collection of installable [Prime Agent](https://github.com/PrimeIntellect-ai/prime-agent) plugins. Each plugin lives under `plugins/`; the root package manifest loads the collection as one capability package. The collection includes both native extensions and Python-backed skills that connect to tools already installed on the user's machine.
 
 ## Install from GitHub
 
@@ -48,6 +48,14 @@ Tool input:
 
 The `question` is required and may be up to 4,000 characters. `context` is optional and may be up to 8,000 characters; it is returned with the answer metadata but is not shown in the question UI. `options` must contain 2–12 non-empty choices, each up to 500 characters. Results include `answerSource: "option"` or `answerSource: "freeform"`.
 
+### trycua
+
+The `trycua` plugin adds a Python-backed `cua-driver-mcp` skill for people who already use [Try Cua's Cua Driver](https://github.com/trycua/cua). It connects to the local `cua-driver mcp` executable and exposes the upstream driver's native tools through Prime Agent. It does not contain or redistribute Cua Driver source code, binaries, or assets.
+
+Install Cua Driver from the [upstream project](https://github.com/trycua/cua) first, then install this collection and restart Prime Agent (or run `/reload`). The bridge defaults to `~/.local/bin/cua-driver mcp` and honors a configured `cua-driver` stdio server in `~/.prime/agent/settings.json`.
+
+See the [trycua plugin README](plugins/trycua/README.md) and [cua-driver-mcp skill](plugins/trycua/skills/cua-driver-mcp/SKILL.md) for usage and attribution. Cua Driver is maintained by Cua AI, Inc. and is MIT-licensed; this collection is an independent integration layer.
+
 ## Requirements
 
 - Prime Agent 0.7 or newer
@@ -57,7 +65,7 @@ Prime Agent provides inherited `@earendil-works/pi-coding-agent` and `typebox` m
 
 ## Adding a plugin
 
-Add the plugin source under `plugins/<name>/`, then add its extension directory to the root `pi.extensions` list in `package.json`. Keeping each plugin in its own directory makes the collection easy to inspect and extend.
+Add the plugin source under `plugins/<name>/`, then add its extension and/or skill directories to the root `pi.extensions` and `pi.skills` lists in `package.json`. Keeping each plugin in its own directory makes the collection easy to inspect and extend.
 
 ## License
 
