@@ -1,32 +1,33 @@
 {
-  "name": "prime-agent-ask-user",
-  "version": "0.2.0",
-  "description": "A multiple-choice ask_user tool with an always-available freeform answer for Prime Agent",
+  "name": "prime-plugins",
+  "version": "0.3.0",
+  "description": "A collection of installable Prime Agent plugins, starting with ask_user",
   "type": "module",
   "license": "MIT",
   "keywords": [
     "pi-package",
     "prime-agent-package",
     "prime-agent",
-    "extension",
+    "plugin-collection",
+    "prime-agent",
     "ask-user"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/am-will/prime-agent-ask-user.git"
+    "url": "git+https://github.com/am-will/prime-plugins.git"
   },
   "bugs": {
-    "url": "https://github.com/am-will/prime-agent-ask-user/issues"
+    "url": "https://github.com/am-will/prime-plugins/issues"
   },
-  "homepage": "https://github.com/am-will/prime-agent-ask-user#readme",
+  "homepage": "https://github.com/am-will/prime-plugins#readme",
   "files": [
-    "extensions",
+    "plugins",
     "README.md",
     "LICENSE"
   ],
   "pi": {
     "extensions": [
-      "./extensions"
+      "./plugins/ask-user/extensions"
     ]
   },
   "peerDependencies": {
