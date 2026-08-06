@@ -7,11 +7,6 @@ const AskUserParameters = Type.Object({
     minLength: 1,
     maxLength: 4_000,
   }),
-  context: Type.Optional(Type.String({
-    description: "Optional context that helps the user answer the question",
-    minLength: 1,
-    maxLength: 4_000,
-  })),
   options: Type.Array(
     Type.String({ minLength: 1, maxLength: 500 }),
     {
@@ -22,38 +17,47 @@ const AskUserParameters = Type.Object({
   ),
 });
 
-export function formatAskUserTitle(question: string, context?: string): string {
-  const contextText = context?.trim();
-  return contextText ? `${question}\n\nContext:\n${contextText}` : question;
-}
+export const OTHER_OPTION = "Other (type your own answer)";
 
 export default function askUser(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "ask_user",
     label: "Ask user",
-    description: "Ask the user a focused multiple-choice question, optionally with context, and wait for their choice before continuing.",
+    description: "Ask the user a focused multiple-choice question, with an always-available freeform answer, and wait for their choice before continuing.",
     parameters: AskUserParameters,
     executionMode: "sequential",
 
     async execute(_toolCallId, params, signal, _onUpdate, ctx) {
+      const options = [...params.options, OTHER_OPTION];
       if (!ctx.hasUI) {
         return {
           content: [{ type: "text", text: "The user-question UI is not available in this mode." }],
-          details: { question: params.question, context: params.context, options: params.options, answer: null },
+          details: { question: params.question, options: params.options, answer: null },
         };
       }
 
-      const answer = await ctx.ui.select(formatAskUserTitle(params.question, params.context), params.options, { signal });
-      if (answer === undefined) {
+      const selected = await ctx.ui.select(params.question, options, { signal });
+      if (selected === undefined) {
         return {
           content: [{ type: "text", text: "The user cancelled the question." }],
-          details: { question: params.question, context: params.context, options: params.options, answer: null, cancelled: true },
+          details: { question: params.question, options: params.options, answer: null, cancelled: true },
+        };
+      }
+
+      const answerSource = selected === OTHER_OPTION ? "freeform" : "option";
+      const answer = selected === OTHER_OPTION
+        ? (await ctx.ui.input("Type your answer", "Your answer", { signal }))?.trim()
+        : selected;
+      if (!answer) {
+        return {
+          content: [{ type: "text", text: "The user did not provide an answer." }],
+          details: { question: params.question, options: params.options, answer: null, answerSource, cancelled: true },
         };
       }
 
       return {
         content: [{ type: "text", text: `The user selected: ${answer}` }],
-        details: { question: params.question, context: params.context, options: params.options, answer },
+        details: { question: params.question, options: params.options, answer, answerSource },
       };
     },
   });
