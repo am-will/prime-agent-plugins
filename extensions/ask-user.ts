@@ -24,7 +24,7 @@ const AskUserParameters = Type.Object({
 
 export function formatAskUserTitle(question: string, context?: string): string {
   const contextText = context?.trim();
-  return contextText ? `Context:\n${contextText}\n\nQuestion:\n${question}` : question;
+  return contextText ? `${question}\n\nContext:\n${contextText}` : question;
 }
 
 export default function askUser(pi: ExtensionAPI): void {
