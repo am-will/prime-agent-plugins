@@ -32,7 +32,13 @@ Review plugins before loading them: Prime Agent extensions run with your user pe
 
 ### ask_user
 
-The first Prime Agent Plugins entry is `ask_user`, a focused multiple-choice question tool that always adds an `Other (type your own answer)` choice. Selecting it opens a freeform input. After the user chooses or types an answer, the tool offers an optional context field. Results identify whether the answer came from a listed option or freeform input, and include any context the user entered.
+The first Prime Agent Plugins entry is `ask_user`, a focused multiple-choice question tool that always adds an `Other (type your own answer)` choice. The interaction is:
+
+1. The user selects a listed choice, or selects `Other (type your own answer)` and types an answer.
+2. The tool opens `Add context (optional)` so the user can add context to that answer.
+3. The user submits context, or leaves it blank/cancels to submit only the answer.
+
+Context is typed by the user during this follow-up step; it is not a field supplied by the tool caller. Results identify whether the answer came from a listed option or freeform input, and include any context the user entered.
 
 Source: [plugins/ask-user](plugins/ask-user)
 
@@ -45,7 +51,7 @@ Tool input:
 }
 ```
 
-The `question` is required and may be up to 4,000 characters. `options` must contain 2–12 non-empty choices, each up to 500 characters. The user can select a listed choice, choose `Other (type your own answer)` to type an answer, and then type optional context. Blank or cancelled context is omitted. Results include `answer`, `answerSource: "option"` or `answerSource: "freeform"`, and an optional `context` field.
+The `question` is required and may be up to 4,000 characters. `options` must contain 2–12 non-empty choices, each up to 500 characters. There is no caller-supplied `context` input. The user can select a listed choice, choose `Other (type your own answer)` to type an answer, and then type optional context. Blank or cancelled context is omitted. Results include `answer`, `answerSource: "option"` or `answerSource: "freeform"`, and an optional `context` field.
 
 For example, the result can include:
 
