@@ -1,0 +1,39 @@
+{
+  "name": "prime-agent-ask-user",
+  "version": "0.1.0",
+  "description": "A focused multiple-choice ask_user tool for Prime Agent",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "prime-agent-package",
+    "prime-agent",
+    "extension",
+    "ask-user"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/am-will/prime-agent-ask-user.git"
+  },
+  "bugs": {
+    "url": "https://github.com/am-will/prime-agent-ask-user/issues"
+  },
+  "homepage": "https://github.com/am-will/prime-agent-ask-user#readme",
+  "files": [
+    "extensions",
+    "README.md",
+    "LICENSE"
+  ],
+  "pi": {
+    "extensions": [
+      "./extensions"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "engines": {
+    "node": ">=22.8.0"
+  }
+}
