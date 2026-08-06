@@ -35,12 +35,11 @@ The extension registers a sequential tool named `ask_user`:
 ```json
 {
   "question": "Which release channel should I use?",
-  "context": "This changes the default audience for the next deployment.",
   "options": ["Stable", "Beta"]
 }
 ```
 
-`question` is required and may be up to 4,000 characters. `context` is optional and may be up to 4,000 characters; interactive clients show it alongside the question to help the user decide. `options` must contain 2–12 non-empty choices, each up to 500 characters. The tool returns the selected string, or a cancellation/no-UI result when the user dismisses the prompt or the runtime has no interactive UI.
+The tool always adds an `Other (type your own answer)` choice. If the user chooses it, the extension opens a freeform input and returns the typed answer. Results include `answerSource: "option"` for a listed choice or `answerSource: "freeform"` for the custom response. `question` is required and may be up to 4,000 characters. `options` must contain 2–12 non-empty choices, each up to 500 characters.
 
 Non-interactive modes such as `--print` and JSON mode do not have a question UI, so the tool reports that it is unavailable instead of blocking.
 
