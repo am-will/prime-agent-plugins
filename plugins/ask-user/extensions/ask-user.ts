@@ -7,6 +7,11 @@ const AskUserParameters = Type.Object({
     minLength: 1,
     maxLength: 4_000,
   }),
+  context: Type.Optional(Type.String({
+    description: "Additional context to return with the answer without showing it in the question UI",
+    minLength: 1,
+    maxLength: 8_000,
+  })),
   options: Type.Array(
     Type.String({ minLength: 1, maxLength: 500 }),
     {
@@ -23,16 +28,21 @@ export default function askUser(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "ask_user",
     label: "Ask user",
-    description: "Ask the user a focused multiple-choice question, with an always-available freeform answer, and wait for their choice before continuing.",
+    description: "Ask the user a focused multiple-choice question, with an always-available freeform answer, and return any supplied context with the answer without showing it in the question UI.",
     parameters: AskUserParameters,
     executionMode: "sequential",
 
     async execute(_toolCallId, params, signal, _onUpdate, ctx) {
       const options = params.options.includes(OTHER_OPTION) ? params.options : [...params.options, OTHER_OPTION];
+      const details = {
+        question: params.question,
+        options: params.options,
+        ...(params.context === undefined ? {} : { context: params.context }),
+      };
       if (!ctx.hasUI) {
         return {
           content: [{ type: "text", text: "The user-question UI is not available in this mode." }],
-          details: { question: params.question, options: params.options, answer: null },
+          details: { ...details, answer: null },
         };
       }
 
@@ -40,7 +50,7 @@ export default function askUser(pi: ExtensionAPI): void {
       if (selected === undefined) {
         return {
           content: [{ type: "text", text: "The user cancelled the question." }],
-          details: { question: params.question, options: params.options, answer: null, cancelled: true },
+          details: { ...details, answer: null, cancelled: true },
         };
       }
 
@@ -51,13 +61,13 @@ export default function askUser(pi: ExtensionAPI): void {
       if (!answer) {
         return {
           content: [{ type: "text", text: "The user did not provide an answer." }],
-          details: { question: params.question, options: params.options, answer: null, answerSource, cancelled: true },
+          details: { ...details, answer: null, answerSource, cancelled: true },
         };
       }
 
       return {
         content: [{ type: "text", text: `${answerSource === "freeform" ? "The user answered" : "The user selected"}: ${answer}` }],
-        details: { question: params.question, options: params.options, answer, answerSource },
+        details: { ...details, answer, answerSource },
       };
     },
   });
