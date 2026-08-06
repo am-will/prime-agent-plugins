@@ -32,7 +32,7 @@ Review plugins before loading them: Prime Agent extensions run with your user pe
 
 ### ask_user
 
-The first Prime Agent Plugins entry is `ask_user`, a focused keyboard-driven questionnaire. It accepts one to five questions in a single interaction and always adds an `Other (type your own answer)` choice to each question. The user can type context at any point, see it under the options, move between questions with the arrow keys, and finish with `Submit answers`.
+The first Prime Agent Plugins entry is `ask_user`, a focused keyboard-driven questionnaire. It accepts one to five questions in a single interaction and always presents one canonical `Other (type your own answer)` choice for each question. Labels such as `Something else (freeform)` are normalized so the UI never shows both variants. Clients with custom extension UI support keep all questions in one panel; users can type immediately, move between questions with arrows or Tab, and finish with `Submit answers`.
 
 Source: [plugins/ask-user](plugins/ask-user)
 
@@ -53,7 +53,9 @@ Tool input:
 }
 ```
 
-`questions` must contain 1–5 questions. Each `question` may be up to 4,000 characters, and each `options` list must contain 2–12 non-empty choices, each up to 500 characters. Context is user-entered, not a caller-supplied tool field. Typing while a listed choice is selected adds context below the options; selecting `Other (type your own answer)` shows the freeform answer in that row. Blank context is omitted. If the agent has more than five questions, it can call the tool again.
+`questions` must contain 1–5 questions. Each `question` may be up to 4,000 characters, and each `options` list must contain 2–12 non-empty choices, each up to 500 characters. Context is user-entered, not a caller-supplied tool field. A single field labeled `Type to add context` sits below the options: for a listed choice its text becomes context, while for `Other (type your own answer)` it becomes the answer itself. Blank text is omitted. If the agent has more than five questions, it can call the tool again.
+
+Prime Work's GUI/RPC adapter groups the requests into one modal. Prime Agent clients that expose only the standard selector API use their native selector fallback; arbitrary extension components require custom UI support from the host.
 
 For example, the result can include:
 

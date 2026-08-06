@@ -65,10 +65,38 @@ function trimValue(value: string | undefined, maxLength: number): string | undef
 function normalizeQuestions(questions: AskQuestion[]): AskQuestion[] {
   return questions.map((question) => ({
     question: question.question,
-    options: question.options.includes(OTHER_OPTION)
-      ? [...question.options]
-      : [...question.options, OTHER_OPTION],
+    options: normalizeOptions(question.options),
   }));
+}
+
+function isOtherOption(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  return normalized === "other"
+    || normalized.startsWith("other (")
+    || normalized.startsWith("other:")
+    || normalized === "something else"
+    || normalized.startsWith("something else (")
+    || normalized === "something different"
+    || normalized.startsWith("something different (")
+    || normalized === "none of the above"
+    || normalized === "freeform";
+}
+
+function normalizeOptions(options: string[]): string[] {
+  const normalized: string[] = [];
+  let hasOther = false;
+  for (const option of options) {
+    if (isOtherOption(option)) {
+      if (!hasOther) {
+        normalized.push(OTHER_OPTION);
+        hasOther = true;
+      }
+      continue;
+    }
+    normalized.push(option);
+  }
+  if (!hasOther) normalized.push(OTHER_OPTION);
+  return normalized;
 }
 
 function createGroupId(): string {
@@ -153,11 +181,9 @@ async function askWithCustomUi(
   try {
     return await ctx.ui.custom<QuestionnaireResult>((tui, theme, _keybindings, done) => {
       const contextInputs = questions.map(() => new Input());
-      const otherInputs = questions.map(() => new Input());
       const selectedIndexes = questions.map(() => 0);
       const answers = new Map<number, Answer>();
       let currentTab = 0;
-      let inputMode: "context" | "other" = "context";
       let cachedLines: string[] | undefined;
       let focused = false;
       let settled = false;
@@ -178,11 +204,11 @@ async function askWithCustomUi(
 
       function currentInput(): Input | undefined {
         if (currentTab >= questions.length) return undefined;
-        return inputMode === "other" ? otherInputs[currentTab] : contextInputs[currentTab];
+        return contextInputs[currentTab];
       }
 
       function syncFocus(): void {
-        for (const input of [...contextInputs, ...otherInputs]) input.focused = false;
+        for (const input of contextInputs) input.focused = false;
         const input = currentInput();
         if (focused && input) input.focused = true;
       }
@@ -197,12 +223,43 @@ async function askWithCustomUi(
         return questions.every((_question, index) => answers.has(index));
       }
 
-      function goToTab(tab: number): void {
-        currentTab = Math.max(0, Math.min(questions.length, tab));
-        if (currentTab < questions.length) {
-          const question = questions[currentTab];
-          inputMode = selectedIndexes[currentTab] === question.options.indexOf(OTHER_OPTION) ? "other" : "context";
+      function saveCurrent(): boolean {
+        if (currentTab >= questions.length) return true;
+
+        const question = questions[currentTab];
+        const selected = question.options[selectedIndexes[currentTab]];
+        const typed = trimValue(contextInputs[currentTab].getValue(), MAX_ANSWER_LENGTH);
+        if (selected === OTHER_OPTION) {
+          if (!typed) {
+            answers.delete(currentTab);
+            return false;
+          }
+          answers.set(currentTab, {
+            question: question.question,
+            answer: typed,
+            answerSource: "freeform",
+          });
+        } else {
+          answers.set(currentTab, {
+            question: question.question,
+            answer: selected,
+            answerSource: "option",
+            ...(typed ? { context: typed.slice(0, MAX_CONTEXT_LENGTH) } : {}),
+          });
         }
+        return true;
+      }
+
+      function orderedAnswers(): Answer[] {
+        return questions.flatMap((_question, index) => {
+          const answer = answers.get(index);
+          return answer ? [answer] : [];
+        });
+      }
+
+      function goToTab(tab: number): void {
+        saveCurrent();
+        currentTab = Math.max(0, Math.min(questions.length, tab));
         refresh();
       }
 
@@ -210,42 +267,22 @@ async function askWithCustomUi(
         const question = currentQuestion();
         if (!question) return;
         selectedIndexes[currentTab] = Math.max(0, Math.min(question.options.length - 1, index));
-        inputMode = question.options[selectedIndexes[currentTab]] === OTHER_OPTION ? "other" : "context";
+        answers.delete(currentTab);
         refresh();
       }
 
       function commitCurrent(): void {
         if (currentTab === questions.length) {
-          if (allAnswered()) finish({ answers: Array.from(answers.values()), cancelled: false });
+          if (allAnswered()) finish({ answers: orderedAnswers(), cancelled: false });
           return;
         }
 
-        const question = questions[currentTab];
-        const selected = question.options[selectedIndexes[currentTab]];
-        const context = trimValue(contextInputs[currentTab].getValue(), MAX_CONTEXT_LENGTH);
-        if (selected === OTHER_OPTION) {
-          const answer = trimValue(otherInputs[currentTab].getValue(), MAX_ANSWER_LENGTH);
-          if (!answer) {
-            inputMode = "other";
-            refresh();
-            return;
-          }
-          answers.set(currentTab, {
-            question: question.question,
-            answer,
-            answerSource: "freeform",
-            ...(context ? { context } : {}),
-          });
+        if (saveCurrent()) {
+          currentTab += 1;
+          refresh();
         } else {
-          answers.set(currentTab, {
-            question: question.question,
-            answer: selected,
-            answerSource: "option",
-            ...(context ? { context } : {}),
-          });
+          refresh();
         }
-
-        goToTab(currentTab + 1);
       }
 
       function handleInput(data: string): void {
@@ -273,12 +310,7 @@ async function askWithCustomUi(
           return;
         }
         if (matchesKey(data, Key.tab)) {
-          if (question.options[selectedIndexes[currentTab]] === OTHER_OPTION) {
-            inputMode = inputMode === "other" ? "context" : "other";
-            refresh();
-          } else {
-            goToTab(currentTab + 1);
-          }
+          goToTab(currentTab + 1);
           return;
         }
         if (matchesKey(data, Key.up)) {
@@ -289,7 +321,7 @@ async function askWithCustomUi(
           selectOption(selectedIndexes[currentTab] + 1);
           return;
         }
-        if (/^[1-9]$/.test(data)) {
+        if (/^[1-9]$/.test(data) && !contextInputs[currentTab].getValue()) {
           const index = Number(data) - 1;
           if (index < question.options.length) {
             selectOption(index);
@@ -301,6 +333,7 @@ async function askWithCustomUi(
           return;
         }
 
+        answers.delete(currentTab);
         currentInput()?.handleInput(data);
         refresh();
       }
@@ -338,10 +371,6 @@ async function askWithCustomUi(
             const prefix = selected ? theme.fg("accent", "> ") : "  ";
             const label = `${index + 1}. ${option}`;
             add(`${prefix}${theme.fg(selected ? "accent" : "text", label)}`);
-            if (selected && option === OTHER_OPTION) {
-              add(theme.fg("muted", "    Type your answer"));
-              for (const line of otherInputs[currentTab].render(Math.max(1, width - 4))) add(`    ${line}`);
-            }
           });
           lines.push("");
           add(theme.fg("muted", "Type to add context"));
@@ -349,7 +378,7 @@ async function askWithCustomUi(
         }
 
         lines.push("");
-        add(theme.fg("dim", "←→ questions · ↑↓ choices · 1–9 select · Enter continue · Tab toggles Other/context · Esc cancel"));
+        add(theme.fg("dim", "←→ questions · ↑↓ choices · 1–9 select · Enter continue · Tab next question · Esc cancel"));
         add(theme.fg("accent", "─".repeat(width)));
         cachedLines = lines;
         return lines;
@@ -361,7 +390,7 @@ async function askWithCustomUi(
         render,
         invalidate: () => {
           cachedLines = undefined;
-          for (const input of [...contextInputs, ...otherInputs]) input.invalidate();
+          for (const input of contextInputs) input.invalidate();
         },
         handleInput,
       };
