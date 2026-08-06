@@ -1,6 +1,6 @@
 {
   "name": "prime-agent-plugins",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A collection of installable Prime Agent plugins, starting with ask_user and trycua",
   "type": "module",
   "license": "MIT",

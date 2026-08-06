@@ -32,7 +32,7 @@ Review plugins before loading them: Prime Agent extensions run with your user pe
 
 ### ask_user
 
-The first Prime Agent Plugins entry is `ask_user`, a focused multiple-choice question tool that always adds an `Other (type your own answer)` choice. Selecting it opens a freeform input. An optional `context` string travels with the answer metadata without being shown in the question UI. Results identify whether the answer came from a listed option or freeform input.
+The first Prime Agent Plugins entry is `ask_user`, a focused multiple-choice question tool that always adds an `Other (type your own answer)` choice. Selecting it opens a freeform input. After the user chooses or types an answer, the tool offers an optional context field. Results identify whether the answer came from a listed option or freeform input, and include any context the user entered.
 
 Source: [plugins/ask-user](plugins/ask-user)
 
@@ -41,12 +41,21 @@ Tool input:
 ```json
 {
   "question": "Which release channel should I use?",
-  "context": "The release will start with a small pilot.",
   "options": ["Stable", "Beta"]
 }
 ```
 
-The `question` is required and may be up to 4,000 characters. `context` is optional and may be up to 8,000 characters; it is returned with the answer metadata but is not shown in the question UI. `options` must contain 2–12 non-empty choices, each up to 500 characters. Results include `answerSource: "option"` or `answerSource: "freeform"`.
+The `question` is required and may be up to 4,000 characters. `options` must contain 2–12 non-empty choices, each up to 500 characters. The user can select a listed choice, choose `Other (type your own answer)` to type an answer, and then type optional context. Blank or cancelled context is omitted. Results include `answer`, `answerSource: "option"` or `answerSource: "freeform"`, and an optional `context` field.
+
+For example, the result can include:
+
+```json
+{
+  "answer": "Beta",
+  "answerSource": "option",
+  "context": "Use Beta for the pilot."
+}
+```
 
 ### trycua
 

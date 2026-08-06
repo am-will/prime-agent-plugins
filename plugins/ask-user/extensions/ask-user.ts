@@ -7,11 +7,6 @@ const AskUserParameters = Type.Object({
     minLength: 1,
     maxLength: 4_000,
   }),
-  context: Type.Optional(Type.String({
-    description: "Additional context to return with the answer without showing it in the question UI",
-    minLength: 1,
-    maxLength: 8_000,
-  })),
   options: Type.Array(
     Type.String({ minLength: 1, maxLength: 500 }),
     {
@@ -28,7 +23,7 @@ export default function askUser(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "ask_user",
     label: "Ask user",
-    description: "Ask the user a focused multiple-choice question, with an always-available freeform answer, and return any supplied context with the answer without showing it in the question UI.",
+    description: "Ask the user a focused multiple-choice question, always include a freeform answer, and optionally collect additional context after the answer.",
     parameters: AskUserParameters,
     executionMode: "sequential",
 
@@ -37,7 +32,6 @@ export default function askUser(pi: ExtensionAPI): void {
       const details = {
         question: params.question,
         options: params.options,
-        ...(params.context === undefined ? {} : { context: params.context }),
       };
       if (!ctx.hasUI) {
         return {
@@ -65,9 +59,17 @@ export default function askUser(pi: ExtensionAPI): void {
         };
       }
 
+      const context = (await ctx.ui.input(
+        "Add context (optional)",
+        "Anything else to add?",
+        { signal },
+      ))?.trim();
+      const answerLabel = answerSource === "freeform" ? "The user answered" : "The user selected";
+      const contextText = context ? `\nAdditional context: ${context}` : "";
+
       return {
-        content: [{ type: "text", text: `${answerSource === "freeform" ? "The user answered" : "The user selected"}: ${answer}` }],
-        details: { ...details, answer, answerSource },
+        content: [{ type: "text", text: `${answerLabel}: ${answer}${contextText}` }],
+        details: { ...details, answer, answerSource, ...(context ? { context } : {}) },
       };
     },
   });
