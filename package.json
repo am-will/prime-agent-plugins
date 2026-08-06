@@ -1,6 +1,6 @@
 {
   "name": "prime-agent-plugins",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "A collection of installable Prime Agent plugins, starting with ask_user and trycua",
   "type": "module",
   "license": "MIT",
@@ -36,6 +36,7 @@
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
     "typebox": "*"
   },
   "engines": {

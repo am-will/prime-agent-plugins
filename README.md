@@ -32,13 +32,7 @@ Review plugins before loading them: Prime Agent extensions run with your user pe
 
 ### ask_user
 
-The first Prime Agent Plugins entry is `ask_user`, a focused multiple-choice question tool that always adds an `Other (type your own answer)` choice. The interaction is:
-
-1. The user selects a listed choice, or selects `Other (type your own answer)` and types an answer.
-2. The tool opens `Add context (optional)` so the user can add context to that answer.
-3. The user submits context, or leaves it blank/cancels to submit only the answer.
-
-Context is typed by the user during this follow-up step; it is not a field supplied by the tool caller. Results identify whether the answer came from a listed option or freeform input, and include any context the user entered.
+The first Prime Agent Plugins entry is `ask_user`, a focused keyboard-driven questionnaire. It accepts one to five questions in a single interaction and always adds an `Other (type your own answer)` choice to each question. The user can type context at any point, see it under the options, move between questions with the arrow keys, and finish with `Submit answers`.
 
 Source: [plugins/ask-user](plugins/ask-user)
 
@@ -46,20 +40,38 @@ Tool input:
 
 ```json
 {
-  "question": "Which release channel should I use?",
-  "options": ["Stable", "Beta"]
+  "questions": [
+    {
+      "question": "Which release channel should I use?",
+      "options": ["Stable", "Beta"]
+    },
+    {
+      "question": "What should I optimize for?",
+      "options": ["Speed", "Safety"]
+    }
+  ]
 }
 ```
 
-The `question` is required and may be up to 4,000 characters. `options` must contain 2–12 non-empty choices, each up to 500 characters. There is no caller-supplied `context` input. The user can select a listed choice, choose `Other (type your own answer)` to type an answer, and then type optional context. Blank or cancelled context is omitted. Results include `answer`, `answerSource: "option"` or `answerSource: "freeform"`, and an optional `context` field.
+`questions` must contain 1–5 questions. Each `question` may be up to 4,000 characters, and each `options` list must contain 2–12 non-empty choices, each up to 500 characters. Context is user-entered, not a caller-supplied tool field. Typing while a listed choice is selected adds context below the options; selecting `Other (type your own answer)` shows the freeform answer in that row. Blank context is omitted. If the agent has more than five questions, it can call the tool again.
 
 For example, the result can include:
 
 ```json
 {
-  "answer": "Beta",
-  "answerSource": "option",
-  "context": "Use Beta for the pilot."
+  "answers": [
+    {
+      "question": "Which release channel should I use?",
+      "answer": "Beta",
+      "answerSource": "option",
+      "context": "Use Beta for the pilot."
+    },
+    {
+      "question": "What should I optimize for?",
+      "answer": "A cautious rollout",
+      "answerSource": "freeform"
+    }
+  ]
 }
 ```
 
