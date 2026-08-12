@@ -13,6 +13,19 @@ Install and configure Cua Driver from the upstream project first:
 
 The skill uses the `cua-driver` executable on `PATH` by default and honors the `cua-driver` stdio entry in `~/.prime/agent/settings.json` when one is configured.
 
+## Cua Driver 0.19 browser control
+
+This integration requires Cua Driver `0.19.0` or newer:
+
+```bash
+cua-driver --version
+cua-driver skills update
+```
+
+After installing or updating, restart Prime Agent or run `/reload`. The Python bridge exposes every live MCP tool and provides concrete methods for the typed browser surface: `get_browser_state`, `browser_prepare`, `browser_navigate`, `browser_click`, `browser_type`, `browser_pointer`, `browser_dialog`, `browser_set_input_files`, and `browser_download`.
+
+For page work, use the upstream [Drive a Web Page workflow](https://cua.ai/docs/how-to-guides/driver/drive-a-web-page): start one session, bind the exact `(pid, window_id)`, snapshot with `semantic_v2`, act only with fresh refs, snapshot again to verify, and end the session. Use native window tools for browser chrome and unsupported browser engines.
+
 ## Install the Prime Agent integration
 
 Install the whole collection:
