@@ -53,7 +53,7 @@ type EncodedAnswer = {
   context?: string;
 };
 
-/** Marker used by Prime Work's RPC UI adapter to group concurrent question requests. */
+/** @deprecated Grouping metadata must not be embedded in visible answer options. */
 export const ASK_USER_RPC_MARKER = "__prime_ask_user__";
 export { OTHER_OPTION };
 
@@ -97,10 +97,6 @@ function normalizeOptions(options: string[]): string[] {
   }
   if (!hasOther) normalized.push(OTHER_OPTION);
   return normalized;
-}
-
-function createGroupId(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
 }
 
 function decodeRpcAnswer(value: string, question: AskQuestion): EncodedAnswer {
@@ -152,22 +148,15 @@ function answerResult(questions: AskQuestion[], result: QuestionnaireResult) {
   };
 }
 
-async function askThroughRpc(ctx: ExtensionContext, questions: AskQuestion[], signal: AbortSignal | undefined): Promise<QuestionnaireResult> {
-  const groupId = createGroupId();
-  const values = await Promise.all(questions.map((question, index) => ctx.ui.select(
-    question.question,
-    [`${ASK_USER_RPC_MARKER}${groupId}:${index}:${questions.length}`, ...question.options],
-    { signal },
-  )));
+async function askThroughSelector(ctx: ExtensionContext, questions: AskQuestion[], signal: AbortSignal | undefined): Promise<QuestionnaireResult> {
+  const answers: Answer[] = [];
+  for (const question of questions) {
+    const value = await ctx.ui.select(question.question, question.options, { signal });
+    if (value === undefined) return { answers: [], cancelled: true };
 
-  if (values.some((value) => value === undefined)) {
-    return { answers: [], cancelled: true };
+    answers.push({ question: question.question, ...decodeRpcAnswer(value, question) });
   }
 
-  const answers = values.map((value, index) => {
-    const decoded = decodeRpcAnswer(value as string, questions[index]);
-    return { question: questions[index].question, ...decoded };
-  });
   return { answers, cancelled: answers.some((answer) => !answer.answer) };
 }
 
@@ -418,7 +407,7 @@ export default function askUser(pi: ExtensionAPI): void {
       }
 
       const customResult = await askWithCustomUi(ctx, questions, signal);
-      const result = customResult ?? await askThroughRpc(ctx, questions, signal);
+      const result = customResult ?? await askThroughSelector(ctx, questions, signal);
       return answerResult(questions, result);
     },
   });
