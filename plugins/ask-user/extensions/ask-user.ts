@@ -401,6 +401,11 @@ async function askWithCustomUi(
 }
 
 export default function askUser(pi: ExtensionAPI): void {
+  // GooeyPi ships its own copy so the GUI can enable or disable the capability
+  // consistently across Prime, OMP, and Pi. Defer to that app-owned copy when
+  // launched by GooeyPi; direct CLI sessions still register this package.
+  if (process.env.GOOEYPI_MANAGES_ASK_USER === "1") return;
+
   pi.registerTool({
     name: "ask_user",
     label: "Ask user",
