@@ -1,6 +1,6 @@
 # Prime Agent Plugins
 
-Prime Agent Plugins is a collection of installable [Prime Agent](https://github.com/PrimeIntellect-ai/prime-agent) plugins. Each plugin lives under `plugins/`; the root package manifest loads the collection as one capability package. The collection includes both native extensions and Python-backed skills that connect to tools already installed on the user's machine.
+Prime Agent Plugins is a collection of installable extensions and skills for [Prime Agent](https://github.com/PrimeIntellect-ai/prime-agent) and base Pi. Each plugin lives under `plugins/`; the root `pi` manifest loads the collection as one capability package in either harness. The collection includes both native extensions and Python-backed skills that connect to tools already installed on the user's machine.
 
 ## Install from GitHub
 
@@ -18,12 +18,30 @@ prime-agent package install https://github.com/am-will/prime-agent-plugins --loc
 
 Prime Agent discovers the plugin directories from the root `pi` manifest. Restart Prime Agent, or run `/reload`, after installing.
 
-For a manual copy of only the ask-user extension:
+For base Pi, install the same collection for every project:
+
+```bash
+pi install https://github.com/am-will/prime-agent-plugins
+```
+
+Or install it only for the current project:
+
+```bash
+pi install https://github.com/am-will/prime-agent-plugins -l
+```
+
+Pi reads the same root manifest. Start a new Pi session or run `/reload` after installing or updating the collection.
+
+For a manual copy of only the ask-user extension, use the extension directory for the harness you want:
 
 ```bash
 mkdir -p ~/.prime/agent/extensions
 curl -fsSL https://raw.githubusercontent.com/am-will/prime-agent-plugins/main/plugins/ask-user/extensions/ask-user.ts \
   -o ~/.prime/agent/extensions/ask-user.ts
+
+mkdir -p ~/.pi/agent/extensions
+curl -fsSL https://raw.githubusercontent.com/am-will/prime-agent-plugins/main/plugins/ask-user/extensions/ask-user.ts \
+  -o ~/.pi/agent/extensions/ask-user.ts
 ```
 
 Review plugins before loading them: Prime Agent extensions run with your user permissions.
@@ -55,7 +73,7 @@ Tool input:
 
 `questions` must contain 1–5 questions. Each `question` may be up to 4,000 characters, and each `options` list must contain 2–12 non-empty choices, each up to 500 characters. Context is user-entered, not a caller-supplied tool field. A single field labeled `Type to add context` sits below the options: for a listed choice its text becomes context, while for `Other (type your own answer)` it becomes the answer itself. Blank text is omitted. If the agent has more than five questions, it can call the tool again.
 
-Prime Work's GUI/RPC adapter groups the requests into one modal. Prime Agent clients that expose only the standard selector API use their native selector fallback; arbitrary extension components require custom UI support from the host.
+GooeyPi's GUI/RPC adapter groups the requests into one modal for Pi-family runtimes. Pi or Prime Agent clients that expose only the standard selector API use their native selector fallback; arbitrary extension components require custom UI support from the host.
 
 For example, the result can include:
 

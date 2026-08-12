@@ -1,13 +1,14 @@
 {
   "name": "prime-agent-plugins",
   "version": "0.7.0",
-  "description": "A collection of installable Prime Agent plugins, starting with ask_user and trycua",
+  "description": "A collection of installable Pi and Prime Agent plugins, starting with ask_user and trycua",
   "type": "module",
   "license": "MIT",
   "keywords": [
     "pi-package",
     "prime-agent-package",
     "plugin-collection",
+    "pi",
     "prime-agent",
     "ask-user",
     "trycua",
