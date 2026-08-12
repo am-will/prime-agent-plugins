@@ -14,7 +14,7 @@ The tool accepts up to five questions per call. If more are needed, the agent ca
 
 For a listed choice, user-entered text is returned with its answer in both the tool content and that answer's `details.answers[].context` field. For `Other`, the same field supplies the freeform answer and no separate input row is shown.
 
-The GUI/RPC adapter groups the questionnaire requests into one modal. A connection-backed TUI that only exposes the standard `select` API cannot host arbitrary custom components; that client limitation is outside the plugin and falls back to its native selector behavior.
+A client that supports custom extension UI shows the questionnaire in one panel. Other clients use their standard selector for each question. The fallback sends only visible answer options, so internal protocol data cannot appear as a choice.
 
 The root collection is installed with:
 

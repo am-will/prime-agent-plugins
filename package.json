@@ -3,6 +3,9 @@
   "version": "0.7.0",
   "description": "A collection of installable Prime Agent plugins, starting with ask_user and trycua",
   "type": "module",
+  "scripts": {
+    "test": "node --experimental-strip-types --test test/*.test.mjs"
+  },
   "license": "MIT",
   "keywords": [
     "pi-package",
