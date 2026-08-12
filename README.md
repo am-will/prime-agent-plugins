@@ -46,6 +46,54 @@ curl -fsSL https://raw.githubusercontent.com/am-will/prime-agent-plugins/main/pl
 
 Review plugins before loading them: Prime Agent extensions run with your user permissions.
 
+## Install a specific plugin
+
+This repository is distributed as one Prime Agent package. Install the collection first, then use a package filter to load only the plugin you want. The package is still downloaded as a whole; the filter controls which resources Prime Agent loads.
+
+For a user-wide installation:
+
+```bash
+prime-agent package install https://github.com/am-will/prime-agent-plugins
+```
+
+For the current project only:
+
+```bash
+prime-agent package install https://github.com/am-will/prime-agent-plugins --local
+```
+
+Then replace the collection's string entry in the relevant settings file with one of these filtered entries. Filter paths are relative to this repository's root. Use `~/.prime/agent/settings.json` for a user-wide install or `.prime/agent/settings.json` for a project-local install. Keep any other settings in the file unchanged.
+
+Load only `ask_user`:
+
+```json
+{
+  "packages": [
+    {
+      "source": "https://github.com/am-will/prime-agent-plugins",
+      "extensions": ["plugins/ask-user/extensions/*.ts"],
+      "skills": []
+    }
+  ]
+}
+```
+
+Load only `trycua`:
+
+```json
+{
+  "packages": [
+    {
+      "source": "https://github.com/am-will/prime-agent-plugins",
+      "extensions": [],
+      "skills": ["plugins/trycua/skills/cua-driver-mcp/SKILL.md"]
+    }
+  ]
+}
+```
+
+If you prefer an interactive selector, run `prime-agent config` after installing and disable the resources you do not want. Restart Prime Agent, or run `/reload`, after changing the filter.
+
 ## Included plugins
 
 ### ask_user
@@ -53,6 +101,10 @@ Review plugins before loading them: Prime Agent extensions run with your user pe
 The first Prime Agent Plugins entry is `ask_user`, a focused keyboard-driven questionnaire. It accepts one to five questions in a single interaction and always presents one canonical `Other (type your own answer)` choice for each question. Labels such as `Something else (freeform)` are normalized so the UI never shows both variants. Clients with custom extension UI support keep all questions in one panel; users can type immediately, move between questions with arrows or Tab, and finish with `Submit answers`.
 
 Source: [plugins/ask-user](plugins/ask-user)
+
+![The ask_user questionnaire in Prime Agent](assets/ask-user-questionnaire.png)
+
+*The `ask_user` questionnaire running in Prime Agent.*
 
 Tool input:
 
@@ -99,7 +151,7 @@ For example, the result can include:
 
 The `trycua` plugin adds a Python-backed `cua-driver-mcp` skill for people who already use [Try Cua's Cua Driver](https://github.com/trycua/cua). It connects to the local `cua-driver mcp` executable and exposes the upstream driver's native tools through Prime Agent. It does not contain or redistribute Cua Driver source code, binaries, or assets.
 
-Install Cua Driver from the [upstream project](https://github.com/trycua/cua) first, then install this collection and restart Prime Agent (or run `/reload`). The bridge defaults to `~/.local/bin/cua-driver mcp` and honors a configured `cua-driver` stdio server in `~/.prime/agent/settings.json`.
+Install Cua Driver `0.19.0` or newer from the [upstream project](https://github.com/trycua/cua) first, then install this collection and restart Prime Agent (or run `/reload`). The bridge defaults to `~/.local/bin/cua-driver mcp` and honors a configured `cua-driver` stdio server in `~/.prime/agent/settings.json`. It exposes the typed browser functions documented in the upstream [Drive a Web Page guide](https://cua.ai/docs/how-to-guides/driver/drive-a-web-page), while continuing to forward every live MCP tool.
 
 See the [trycua plugin README](plugins/trycua/README.md) and [cua-driver-mcp skill](plugins/trycua/skills/cua-driver-mcp/SKILL.md) for usage and attribution. Cua Driver is maintained by Cua AI, Inc. and is MIT-licensed; this collection is an independent integration layer.
 
