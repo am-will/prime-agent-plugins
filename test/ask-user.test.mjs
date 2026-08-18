@@ -125,3 +125,77 @@ test("cancelling a select-only questionnaire returns no partial answers", async 
   assert.equal(result.details.cancelled, true);
   assert.deepEqual(result.details.answers, []);
 });
+
+function customUiHarness() {
+  let component;
+  let resolveCustom;
+  let renderRequests = 0;
+  const completion = new Promise((resolve) => {
+    resolveCustom = resolve;
+  });
+  const theme = {
+    fg(_color, text) { return text; },
+    bg(_color, text) { return text; },
+    bold(text) { return text; },
+  };
+  const ui = {
+    custom(factory) {
+      component = factory(
+        { requestRender() { renderRequests += 1; } },
+        theme,
+        {},
+        resolveCustom,
+      );
+      component.focused = true;
+      return completion;
+    },
+  };
+
+  return {
+    ui,
+    get component() {
+      assert.ok(component);
+      return component;
+    },
+    get renderRequests() { return renderRequests; },
+  };
+}
+
+test("custom questionnaire wraps long question text to the available width", async () => {
+  const tool = registeredTool();
+  const harness = customUiHarness();
+  const pending = execute(tool, [{
+    question: "This question is long enough that it must wrap across multiple terminal lines",
+    options: ["Alpha", "Beta"],
+  }], harness.ui);
+
+  await Promise.resolve();
+  const lines = harness.component.render(24);
+  const questionLines = lines.filter(
+    (line) => line.includes("This question") || line.includes("long enough") || line.includes("terminal lines"),
+  );
+
+  assert.ok(questionLines.length > 1);
+  harness.component.handleInput("\x1b");
+  await pending;
+});
+
+test("custom questionnaire ignores an initial terminal focus-out event", async () => {
+  const tool = registeredTool();
+  const harness = customUiHarness();
+  const pending = execute(tool, [{
+    question: "Choose one",
+    options: ["Alpha", "Beta"],
+  }], harness.ui);
+
+  await Promise.resolve();
+  const renderRequestsBefore = harness.renderRequests;
+  harness.component.handleInput("\x1b[O");
+
+  assert.equal(harness.renderRequests, renderRequestsBefore);
+  harness.component.handleInput("\r");
+  harness.component.handleInput("\r");
+  const result = await pending;
+  assert.equal(result.details.cancelled, false);
+  assert.equal(result.details.answers[0].answer, "Alpha");
+});

@@ -1,5 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { Input, Key, matchesKey, truncateToWidth } from "@earendil-works/pi-tui";
+import { Input, Key, matchesKey, truncateToWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
 
 const MAX_CONTEXT_LENGTH = 8_000;
@@ -275,6 +275,8 @@ async function askWithCustomUi(
       }
 
       function handleInput(data: string): void {
+        if (data === "\x1b[I" || data === "\x1b[O") return;
+
         if (matchesKey(data, Key.escape)) {
           finish({ answers: [], cancelled: true });
           return;
@@ -353,7 +355,9 @@ async function askWithCustomUi(
         } else {
           const question = questions[currentTab];
           add(theme.fg("text", `Question ${currentTab + 1} of ${questions.length}`));
-          add(theme.fg("text", ` ${question.question}`));
+          for (const line of wrapTextWithAnsi(theme.fg("text", question.question), Math.max(1, width - 1))) {
+            add(` ${line}`);
+          }
           lines.push("");
           question.options.forEach((option, index) => {
             const selected = index === selectedIndexes[currentTab];
